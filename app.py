@@ -12,8 +12,8 @@ st.set_page_config(layout="wide", page_title="🔥 Canada Wildfire Dashboard")
 def load_data():
     gdf = gpd.read_file("firms_canada_latest.geojson")
     gdf["acq_date"] = pd.to_datetime(gdf["acq_date"])
-gdf["latitude"] = gdf.geometry.y
-gdf["longitude"] = gdf.geometry.x
+    gdf["latitude"] = gdf.geometry.y
+    gdf["longitude"] = gdf.geometry.x
     return gdf
 
 gdf = load_data()
