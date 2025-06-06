@@ -3,7 +3,7 @@ import leafmap.foliumap as leafmap
 import geopandas as gpd
 import pandas as pd
 import plotly.express as px
-import json
+import io
 
 st.set_page_config(layout="wide", page_title="🔥 Canada Wildfire Dashboard")
 
@@ -81,10 +81,10 @@ if not filtered.empty:
     st.markdown("### 💾 Export Filtered Data")
     st.download_button("⬇️ Download CSV", data=filtered.drop(columns="geometry").to_csv(index=False), file_name="filtered_fires.csv")
 
-    geojson_data = filtered.to_json()
-    if not isinstance(geojson_data, str):
-        geojson_data = json.dumps(geojson_data)
-    st.download_button("⬇️ Download GeoJSON", data=geojson_data, file_name="filtered_fires.geojson", mime="application/geo+json")
+    buffer = io.StringIO()
+    filtered.to_file(buffer, driver="GeoJSON")
+    geojson_str = buffer.getvalue()
+    st.download_button("⬇️ Download GeoJSON", data=geojson_str, file_name="filtered_fires.geojson", mime="application/geo+json")
 
 # Charts
 if not filtered.empty:
