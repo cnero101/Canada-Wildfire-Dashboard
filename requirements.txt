@@ -1,6 +1,0 @@
-streamlit
-leafmap
-pandas
-plotly
-matplotlib
-geopandas
