@@ -1,5 +1,0 @@
-streamlit
-leafmap
-geopandas
-pandas
-plotly
