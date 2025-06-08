@@ -11,6 +11,7 @@ st.set_page_config(layout="wide", page_title="🔥 Canada Wildfire Dashboard")
 
 @st.cache_data(ttl=1800)
 def load_firms_data():
+    api_key = "0c4b25f5d51a58283ea27f36666b6d57"
     url = "https://firms.modaps.eosdis.nasa.gov/data/active_fire/viirs/csv/VIIRS_Canada_24h.csv"
     df = pd.read_csv(url)
     df["acq_date"] = pd.to_datetime(df["acq_date"])
