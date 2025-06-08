@@ -1,15 +1,14 @@
-# Canada Wildfire Dashboard
+# Canada Wildfire Dashboard (Real-Time FIRMS Version)
 
-A real-time dashboard for FIRMS wildfire data using Streamlit and Leafmap.
+This Streamlit dashboard visualizes near real-time wildfire hotspots in Canada using NASA FIRMS VIIRS data.
 
 ## Features
-- 🔥 Live map with heatmap and markers
-- 📊 Fire distribution by province
-- 🎯 KPI summaries
-- 📈 Time trends and bar charts
-- 💾 CSV/GeoJSON export
+- 🔥 Heatmap of wildfires updated every 24h
+- 📊 Pie chart of confidence levels
+- 🎯 KPI metrics and hourly trend line
+- 💾 Export filtered data
 
-## Running Locally
+## Run Locally
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
