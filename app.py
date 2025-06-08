@@ -16,7 +16,6 @@ def load_firms_data():
     df = pd.read_csv(url)
     date_col = "acq_date" if "acq_date" in df.columns else "date"
     df["acq_date"] = pd.to_datetime(df[date_col])
-    #df["acq_date"] = pd.to_datetime(df["acq_date"])
     df["geometry"] = [Point(xy) for xy in zip(df["longitude"], df["latitude"])]
     gdf = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
     gdf["value"] = gdf["bright_ti4"]
