@@ -14,7 +14,9 @@ def load_firms_data():
     api_key = "0c4b25f5d51a58283ea27f36666b6d57"
     url = f"https://firms.modaps.eosdis.nasa.gov/api/country/csv/{api_key}/VIIRS_SNPP_C2/CAN/1"
     df = pd.read_csv(url)
-    df["acq_date"] = pd.to_datetime(df["acq_date"])
+    date_col = "acq_date" if "acq_date" in df.columns else "date"
+    df["acq_date"] = pd.to_datetime(df[date_col])
+    #df["acq_date"] = pd.to_datetime(df["acq_date"])
     df["geometry"] = [Point(xy) for xy in zip(df["longitude"], df["latitude"])]
     gdf = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
     gdf["value"] = gdf["bright_ti4"]
