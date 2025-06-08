@@ -56,7 +56,6 @@ with map_col:
     m = leafmap.Map(center=[56, -106], zoom=4, basemap=basemap)
     if not filtered.empty:
         m.add_heatmap(data=filtered[["latitude", "longitude"]], latitude="latitude", longitude="longitude", name="🔥 Heatmap")
-        #m.add_heatmap(data=filtered, latitude="latitude", longitude="longitude", name="🔥 Heatmap")
         for _, row in filtered.iterrows():
             m.add_marker([row.geometry.y, row.geometry.x],
                          popup=f"🔥 {row['acq_date'].date()}<br>Bright: {row['bright_ti4']}<br>{row['province']} - {row['city']}")

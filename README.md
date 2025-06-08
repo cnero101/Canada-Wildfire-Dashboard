@@ -1,22 +1,16 @@
 # Canada Wildfire Dashboard
 
-This is a Streamlit app that visualizes near real-time wildfire hotspots across Canada.
+A real-time dashboard for FIRMS wildfire data using Streamlit and Leafmap.
 
 ## Features
-- 🔥 FIRMS NASA data for Canada
-- 📍 Province and city filtering
-- 🗺️ Interactive map with markers and heatmap
-- 📊 Pie, bar, and line charts
-- 💾 CSV and GeoJSON export options
+- 🔥 Live map with heatmap and markers
+- 📊 Fire distribution by province
+- 🎯 KPI summaries
+- 📈 Time trends and bar charts
+- 💾 CSV/GeoJSON export
 
-## How to Run
+## Running Locally
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
-
-## Files
-- `app.py`: main dashboard script
-- `firms_canada_latest.geojson`: sample data
-- `requirements.txt`: dependencies
-- `Canada_Wildfire_Dashboard_Notebook.ipynb`: optional Jupyter version
