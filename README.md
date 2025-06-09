@@ -1,8 +1,15 @@
-# Canada Wildfire Dashboard (Live FIRMS Data)
+# Canada Wildfire Dashboard (MODIS)
 
-This dashboard uses real-time NASA FIRMS VIIRS_SNPP_NRT data for wildfire monitoring in Canada.
+This Streamlit app displays real-time wildfire detections in Canada using NASA FIRMS MODIS NRT data.
 
-## Setup
+## Features
+- 🌍 Uses MODIS_NRT dataset
+- 🗺️ Interactive map with heatmap and markers
+- 📊 KPI and pie chart
+- 📈 Time-based trends
+- 💾 Export filtered data as CSV
+
+## Run
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
