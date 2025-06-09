@@ -27,7 +27,13 @@ available_dates = gdf["acq_date"].dt.date.unique()
 selected_date = st.sidebar.date_input("Select Date", value=max(available_dates))
 
 st.sidebar.markdown("### 🗺️ Basemap")
-basemap = st.sidebar.selectbox("Basemap", options=["OpenStreetMap", "CartoDB.Positron", "CartoDB.DarkMatter"])
+basemap_choice = st.sidebar.selectbox("Basemap", options=["OpenStreetMap", "CartoDB.Positron", "CartoDB.DarkMatter"])
+basemap_dict = {
+    "OpenStreetMap": "OpenStreetMap",
+    "CartoDB.Positron": "CartoDB.Positron",
+    "CartoDB.DarkMatter": "CartoDB.DarkMatter"
+}
+selected_basemap = basemap_dict[basemap_choice]
 
 st.sidebar.markdown("### 🌐 Layers")
 show_hotspots = st.sidebar.checkbox("🔥 Hotspots", value=True)
@@ -38,14 +44,14 @@ show_precip = st.sidebar.checkbox("🌧️ Precipitation")
 # Filter logic
 filtered = gdf[gdf["acq_date"].dt.date == selected_date]
 
-# Top Layout: Map + KPIs + Pie
+# Top Layout: Map + KPI + Pie chart side-by-side
 st.markdown("## 🔥 Canada Wildfire Dashboard")
 st.caption("Real-time hotspot monitoring with overlays and insights")
 
-map_col, stats_col = st.columns([3, 1], gap="large")
+map_col, metrics_col, pie_col = st.columns([3, 1, 1], gap="large")
 
 with map_col:
-    m = leafmap.Map(center=[56, -106], zoom=4, height=500, basemap=basemap)
+    m = leafmap.Map(center=[56, -106], zoom=4, height=500, basemap=selected_basemap)
     if not filtered.empty:
         if show_hotspots:
             m.add_heatmap(data=filtered, latitude="latitude", longitude="longitude", value="value", name="🔥 Heatmap")
@@ -54,34 +60,27 @@ with map_col:
             m.add_marker([row["latitude"], row["longitude"]], popup=popup)
     m.to_streamlit()
 
-with stats_col:
+with metrics_col:
     st.markdown("### 🎯 Key Metrics")
     st.metric("Total Fires", len(filtered))
     if not filtered.empty:
         st.metric("Max Brightness", f"{filtered['brightness'].max():.1f}")
         st.metric("Latest Detection", str(filtered["acq_date"].max().date()))
-        st.metric("Latest City", "Red Deer")
+        st.metric("Latest City", "Red Deer")  # Replace with actual city if needed
 
-    st.markdown("### 🔥 Fire Distribution")
+with pie_col:
     if not filtered.empty:
         fire_by_sat = filtered["satellite"].value_counts(normalize=True) * 100
-        fig = px.pie(names=fire_by_sat.index, values=fire_by_sat.values, title="Fire % by Satellite", hole=0.4)
+        fig = px.pie(names=fire_by_sat.index, values=fire_by_sat.values, title="🔥 Fire % by Satellite", hole=0.4)
         st.plotly_chart(fig, use_container_width=True)
 
-# Below Map: Dual Chart Section
-st.markdown("### 📊 Trends and Distribution")
+# Below Map: Fire trend (histogram only)
+st.markdown("### 📊 Fire Frequency by Hour")
 
-chart_col1, chart_col2 = st.columns(2)
 if not filtered.empty:
-    with chart_col1:
-        trend = filtered.groupby(filtered["acq_date"].dt.hour).size()
-        fig = px.bar(x=trend.index, y=trend.values, labels={"x": "Hour", "y": "Fire Count"}, title="Hourly Fire Distribution")
-        st.plotly_chart(fig, use_container_width=True)
-
-    with chart_col2:
-        avg_brightness = filtered.groupby(filtered["acq_date"].dt.hour)["brightness"].mean()
-        fig = px.line(x=avg_brightness.index, y=avg_brightness.values, labels={"x": "Hour", "y": "Avg Brightness"}, title="Brightness Trend")
-        st.plotly_chart(fig, use_container_width=True)
+    time_group = filtered.groupby(filtered["acq_date"].dt.hour).size()
+    fig = px.bar(x=time_group.index, y=time_group.values, labels={"x": "Hour", "y": "Fire Count"}, title="Hourly Fire Distribution")
+    st.plotly_chart(fig, use_container_width=True)
 
 # Export
 st.markdown("### 💾 Export Filtered Data")
