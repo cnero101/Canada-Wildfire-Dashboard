@@ -4,18 +4,16 @@ import geopandas as gpd
 from shapely.geometry import Point
 import plotly.express as px
 import leafmap.foliumap as leafmap
-import tempfile
-import os
 
 st.set_page_config(layout="wide", page_title="🔥 Canada Wildfire Dashboard")
 
 @st.cache_data(ttl=1800)
 def load_firms_data():
-    api_key = "0c4b25f5d51a58283ea27f36666b6d57"
-    url = f"https://firms.modaps.eosdis.nasa.gov/api/country/csv/{api_key}/VIIRS_SNPP_C2/CAN/1"
+    token = "4d36c3b504efa11b5b7cb8fc20c392c6"
+    url = f"https://firms.modaps.eosdis.nasa.gov/api/country/csv/{token}/VIIRS_SNPP_NRT/CAN/1"
     df = pd.read_csv(url)
 
-    st.write("Available columns in FIRMS data:", df.columns.tolist())
+    st.write("✅ Available columns in FIRMS data:", df.columns.tolist())
 
     if "acq_date" in df.columns:
         df["acq_date"] = pd.to_datetime(df["acq_date"])
@@ -27,9 +25,16 @@ def load_firms_data():
 
     df["geometry"] = [Point(xy) for xy in zip(df["longitude"], df["latitude"])]
     gdf = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
-    gdf["value"] = gdf["bright_ti4"]
+    gdf["value"] = gdf["bright_ti4"] if "bright_ti4" in gdf.columns else 1
     return gdf
 
 gdf = load_firms_data()
+st.title("🔥 Canada Wildfire Dashboard")
+st.caption("Real-time VIIRS fire data via NASA FIRMS API")
 
-# The rest of your dashboard logic follows...
+# Simple visual check
+if not gdf.empty:
+    st.map(gdf, latitude="latitude", longitude="longitude")
+    st.dataframe(gdf.head())
+else:
+    st.warning("No data available.")
