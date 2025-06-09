@@ -1,5 +1,5 @@
 streamlit
-leafmap
 geopandas
 pandas
+leafmap
 plotly

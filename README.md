@@ -1,14 +1,8 @@
-# Canada Wildfire Dashboard (Real-Time FIRMS Version)
+# Canada Wildfire Dashboard (Live FIRMS Data)
 
-This Streamlit dashboard visualizes near real-time wildfire hotspots in Canada using NASA FIRMS VIIRS data.
+This dashboard uses real-time NASA FIRMS VIIRS_SNPP_NRT data for wildfire monitoring in Canada.
 
-## Features
-- 🔥 Heatmap of wildfires updated every 24h
-- 📊 Pie chart of confidence levels
-- 🎯 KPI metrics and hourly trend line
-- 💾 Export filtered data
-
-## Run Locally
+## Setup
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
