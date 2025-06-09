@@ -30,41 +30,66 @@ def load_firms_data():
     gdf["value"] = gdf["bright_ti4"] if "bright_ti4" in gdf.columns else 1
     return gdf
 
+# Load data
 gdf = load_firms_data()
 filtered = gdf.copy()
 
-# UI
+# Sidebar Filters
+st.sidebar.header("📍 Filters")
+if "province" in gdf.columns:
+    provinces = ["All"] + sorted(gdf["province"].dropna().unique())
+    selected_province = st.sidebar.selectbox("Province", provinces)
+    if selected_province != "All":
+        filtered = filtered[filtered["province"] == selected_province]
+
+if "city" in filtered.columns:
+    cities = ["All"] + sorted(filtered["city"].dropna().unique())
+    selected_city = st.sidebar.selectbox("City", cities)
+    if selected_city != "All":
+        filtered = filtered[filtered["city"] == selected_city]
+
+today = pd.Timestamp.now().date()
+selected_date = st.sidebar.date_input("Select Date", value=today)
+filtered = filtered[filtered["acq_date"].dt.date == selected_date]
+
+# MAIN layout
 st.title("🔥 Canada Wildfire Dashboard")
 st.caption("Real-time VIIRS fire data via NASA FIRMS API")
 
-with st.sidebar:
-    st.header("📍 Filters")
+# Map + KPIs/Pie side by side
+map_col, stats_col = st.columns([3, 1])
+with map_col:
+    m = leafmap.Map(center=[56, -106], zoom=4, height=500)
+    if not filtered.empty:
+        m.add_heatmap(data=filtered, latitude="latitude", longitude="longitude", value="value", name="🔥 Heatmap")
+        for _, row in filtered.iterrows():
+            popup = f"🔥 {row['acq_date'].date()}<br>Bright: {row['bright_ti4']}<br>Conf: {row['confidence']}"
+            m.add_marker([row["latitude"], row["longitude"]], popup=popup)
+    m.to_streamlit()
 
-    # Optional province filter
-    if "province" in gdf.columns:
-        provinces = ["All"] + sorted(gdf["province"].dropna().unique())
-        selected_province = st.selectbox("Select Province", provinces)
-        if selected_province != "All":
-            filtered = filtered[filtered["province"] == selected_province]
-
-    # Optional city filter
-    if "city" in filtered.columns:
-        cities = ["All"] + sorted(filtered["city"].dropna().unique())
-        selected_city = st.selectbox("Select City", cities)
-        if selected_city != "All":
-            filtered = filtered[filtered["city"] == selected_city]
-
-    # Date filter
-    today = pd.Timestamp.now().date()
-    selected_date = st.date_input("Select Date", value=today)
-    filtered = filtered[filtered["acq_date"].dt.date == selected_date]
-
-# Show metrics
-st.markdown("### 🔥 Fire Detections")
-if not filtered.empty:
-    st.map(filtered, latitude="latitude", longitude="longitude")
-    st.dataframe(filtered[["acq_date", "latitude", "longitude", "confidence", "bright_ti4"]].head())
+with stats_col:
+    st.markdown("### 🎯 Key Metrics")
     st.metric("Total Fires", len(filtered))
-    st.metric("Max Brightness", f"{filtered['bright_ti4'].max():.1f} K")
+    if not filtered.empty:
+        st.metric("Max Brightness", f"{filtered['bright_ti4'].max():.1f} K")
+        st.metric("Latest Detection", str(filtered["acq_date"].max().date()))
+
+    if "province" in filtered.columns:
+        pie_data = filtered["province"].value_counts().reset_index()
+        pie_data.columns = ["Province", "Fires"]
+        fig = px.pie(pie_data, names="Province", values="Fires", title="🔥 Fires by Province", hole=0.4)
+        st.plotly_chart(fig, use_container_width=True)
+
+# Charts Section
+st.markdown("### 📈 Trends Over Time")
+if not filtered.empty:
+    trend = filtered.groupby(filtered["acq_date"].dt.hour).size()
+    st.line_chart(trend)
+
+# Export
+st.markdown("### 💾 Export Filtered Data")
+if not filtered.empty:
+    st.download_button("⬇️ Download CSV", data=filtered.to_csv(index=False), file_name="fires_filtered.csv")
+
 else:
-    st.warning("No fire data for the selected filters.")
+    st.warning("No fire data available for the selected filters.")
