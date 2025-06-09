@@ -18,8 +18,8 @@ def load_local_data():
         st.stop()
 
     df["geometry"] = [Point(xy) for xy in zip(df["longitude"], df["latitude"])]
-    df["latitude"] = df["geometry"].y
-    df["longitude"] = df["geometry"].x
+    df["latitude"] = df["geometry"].apply(lambda p: p.y)
+    df["longitude"] = df["geometry"].apply(lambda p: p.x)
     gdf = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
     gdf["value"] = gdf["brightness"] if "brightness" in gdf.columns else 1
     return gdf
