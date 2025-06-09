@@ -1,5 +1,6 @@
 streamlit
 geopandas
-pandas
 leafmap
 plotly
+pandas
+shapely
