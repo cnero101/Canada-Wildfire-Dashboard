@@ -5,38 +5,35 @@ from shapely.geometry import Point
 import plotly.express as px
 import leafmap.foliumap as leafmap
 
-st.set_page_config(layout="wide", page_title="🔥 Canada Wildfire Dashboard (Demo)")
+st.set_page_config(layout="wide", page_title="🔥 Canada Wildfire Dashboard (Offline)")
 
 @st.cache_data
-def load_demo_data():
-    url = "https://firms.modaps.eosdis.nasa.gov/data/active_fire/c6/csv/MODIS_C6_Canada_7d.csv"
-    df = pd.read_csv(url)
+def load_local_data():
+    df = pd.read_csv("MODIS_C6_Canada_7d.csv")
 
     if "acq_date" in df.columns:
         df["acq_date"] = pd.to_datetime(df["acq_date"])
     else:
-        st.error("❌ acq_date column missing in static file.")
+        st.error("❌ acq_date column missing in local file.")
         st.stop()
 
     df["geometry"] = [Point(xy) for xy in zip(df["longitude"], df["latitude"])]
     df["latitude"] = df["geometry"].y
     df["longitude"] = df["geometry"].x
     gdf = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
-    gdf["value"] = gdf["brightness"]
+    gdf["value"] = gdf["brightness"] if "brightness" in gdf.columns else 1
     return gdf
 
-gdf = load_demo_data()
+gdf = load_local_data()
 filtered = gdf.copy()
 
-# Sidebar filters
 st.sidebar.header("📍 Filters")
 today = pd.Timestamp.now().date()
 selected_date = st.sidebar.date_input("Select Date", value=today)
 filtered = filtered[filtered["acq_date"].dt.date == selected_date]
 
-# Main layout
-st.title("🔥 Canada Wildfire Dashboard (Static Demo)")
-st.caption("MODIS C6 - last 7 days (public feed)")
+st.title("🔥 Canada Wildfire Dashboard (Static Local)")
+st.caption("MODIS C6 - Last 7 Days (local CSV)")
 
 map_col, stats_col = st.columns([3, 1])
 with map_col:
@@ -56,7 +53,7 @@ with stats_col:
         st.metric("Latest Detection", str(filtered["acq_date"].max().date()))
 
 # Pie chart
-if not filtered.empty:
+if not filtered.empty and "satellite" in filtered.columns:
     fig = px.pie(filtered, names="satellite", title="🔥 Fires by Satellite", hole=0.4)
     st.plotly_chart(fig, use_container_width=True)
 
@@ -69,6 +66,6 @@ if not filtered.empty:
 # Export
 st.markdown("### 💾 Export Filtered Data")
 if not filtered.empty:
-    st.download_button("⬇️ Download CSV", data=filtered.to_csv(index=False), file_name="fires_demo_filtered.csv")
+    st.download_button("⬇️ Download CSV", data=filtered.to_csv(index=False), file_name="fires_static_filtered.csv")
 else:
     st.warning("No fire data for the selected date.")
