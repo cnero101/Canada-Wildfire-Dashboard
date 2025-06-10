@@ -1,8 +1,8 @@
 # Canada Wildfire Dashboard
-Offline dashboard using MODIS_C6_Canada_7d.csv with filters, KPIs, map, and trend charts.
+This dashboard visualizes real-time NASA FIRMS wildfire hotspots across Canada.
 
-## To Run:
+## Run locally
 ```bash
 streamlit run app.py
 ```
-Ensure MODIS_C6_Canada_7d.csv is in the same directory.
+Requires: Streamlit, GeoPandas, Leafmap, Plotly
